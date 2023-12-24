@@ -69,6 +69,16 @@ func (c *card) getPoints() int {
 	return points
 }
 
+func (c *card) getNumMatching() int {
+	numMatching := 0
+	for _, winningNum := range c.winningNums {
+		if slices.Contains(c.nums, winningNum) {
+			numMatching++
+		}
+	}
+	return numMatching
+}
+
 func main() {
 	scanner, closeF := getScanner("./input.txt")
 	defer closeF()
@@ -78,10 +88,38 @@ func main() {
 		cards = append(cards, parseCard(line))
 	}
 
-	totalPoints := 0
+	//part 1
+	//totalPoints := 0
+	//for _, iCard := range cards {
+	//	totalPoints += iCard.getPoints()
+	//}
+
+	matchingMap := make(map[int]int)
 	for _, iCard := range cards {
-		totalPoints += iCard.getPoints()
+		matchingMap[iCard.cardNum] = iCard.getNumMatching()
 	}
 
-	fmt.Println("totalPoints: ", totalPoints)
+	getWonCopies := func(gameNum, copiesWon int) []int {
+		wonCopies := make([]int, 0)
+		for i := gameNum + 1; i <= gameNum+copiesWon; i++ {
+			wonCopies = append(wonCopies, i)
+		}
+		return wonCopies
+	}
+
+	totalCopies := 0
+	copiesWon := make([]int, 0)
+	for gameNum := range matchingMap {
+		totalCopies++
+		copiesWon = append(copiesWon, getWonCopies(gameNum, matchingMap[gameNum])...)
+	}
+
+	for len(copiesWon) > 0 {
+		totalCopies++
+		curCopy := copiesWon[0]
+		copiesWon = copiesWon[1:]
+		copiesWon = append(copiesWon, getWonCopies(curCopy, matchingMap[curCopy])...)
+	}
+
+	fmt.Println("totalCopies: ", totalCopies)
 }
