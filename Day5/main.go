@@ -121,14 +121,38 @@ func main() {
 	}
 
 	minVal := math.MaxInt
-	for _, val := range initialVals["seeds"] {
-		nextAlm := ""
-		val, nextAlm = almMap["seed"].calcNext(val)
-		for nextAlm != "" {
-			val, nextAlm = almMap[nextAlm].calcNext(val)
+
+	counter := 0
+	fmt.Println(initialVals["seeds"])
+	for i := 0; i < len(initialVals["seeds"]); i += 2 {
+		fmt.Println("i: ", i)
+		fmt.Println("initial: ", initialVals["seeds"][i])
+		fmt.Println("final: ", initialVals["seeds"][i]+initialVals["seeds"][i+1])
+		for val := initialVals["seeds"][i]; val < initialVals["seeds"][i]+initialVals["seeds"][i+1]; val++ {
+			nextAlm := ""
+			v := val
+			v, nextAlm = almMap["seed"].calcNext(v)
+			for nextAlm != "" {
+				v, nextAlm = almMap[nextAlm].calcNext(v)
+			}
+			minVal = min(minVal, v)
+			if counter%1000000 == 0 {
+				fmt.Println("millions: ", counter/1000000)
+			}
+			//fmt.Println("counter: ", counter)
+			counter++
 		}
-		minVal = min(minVal, val)
 	}
+
+	//part 1
+	//for _, val := range initialVals["seeds"] {
+	//	nextAlm := ""
+	//	val, nextAlm = almMap["seed"].calcNext(val)
+	//	for nextAlm != "" {
+	//		val, nextAlm = almMap[nextAlm].calcNext(val)
+	//	}
+	//	minVal = min(minVal, val)
+	//}
 
 	fmt.Println("minVal: ", minVal)
 }
