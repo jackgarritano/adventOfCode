@@ -38,8 +38,13 @@ func getNumDuplicates(item int, list *[]int) int {
 
 func (c *hand) addStrength() {
 	tagToOccs := make(map[int]int)
+	numJokers := 0
 	for _, card := range c.cards {
-		tagToOccs[card] = getNumDuplicates(card, &c.cards)
+		if card == 1 {
+			numJokers++
+		} else {
+			tagToOccs[card] = getNumDuplicates(card, &c.cards)
+		}
 	}
 	orderedOccs := make([]int, 0, len(tagToOccs))
 	for tag := range tagToOccs {
@@ -48,17 +53,23 @@ func (c *hand) addStrength() {
 	slices.SortFunc(orderedOccs, func(a, b int) int {
 		return b - a
 	})
-	if orderedOccs[0] == 5 {
+	if len(orderedOccs) > 0 {
+		orderedOccs[0] += numJokers
+	} else {
+		orderedOccs = append(orderedOccs, numJokers)
+	}
+
+	if len(orderedOccs) >= 1 && orderedOccs[0] == 5 {
 		c.strength = 7
-	} else if orderedOccs[0] == 4 {
+	} else if len(orderedOccs) >= 1 && orderedOccs[0] == 4 {
 		c.strength = 6
-	} else if orderedOccs[0] == 3 && orderedOccs[1] == 2 {
+	} else if len(orderedOccs) >= 2 && orderedOccs[0] == 3 && orderedOccs[1] == 2 {
 		c.strength = 5
-	} else if orderedOccs[0] == 3 {
+	} else if len(orderedOccs) >= 1 && orderedOccs[0] == 3 {
 		c.strength = 4
-	} else if orderedOccs[0] == 2 && orderedOccs[1] == 2 {
+	} else if len(orderedOccs) >= 2 && orderedOccs[0] == 2 && orderedOccs[1] == 2 {
 		c.strength = 3
-	} else if orderedOccs[0] == 2 {
+	} else if len(orderedOccs) >= 1 && orderedOccs[0] == 2 {
 		c.strength = 2
 	} else {
 		c.strength = 1
@@ -68,8 +79,6 @@ func (c *hand) addStrength() {
 func newHand(cardStrs string, bidStr string) *hand {
 	cards := make([]int, 0, 5)
 	for _, cardStr := range cardStrs {
-		fmt.Println("str(cardstr): ", string(cardStr))
-		fmt.Println("cards: ", cards)
 		if result, ok := parseInt(string(cardStr)); ok {
 			cards = append(cards, result)
 		} else {
@@ -77,7 +86,7 @@ func newHand(cardStrs string, bidStr string) *hand {
 			case "T":
 				cards = append(cards, 10)
 			case "J":
-				cards = append(cards, 11)
+				cards = append(cards, 1)
 			case "Q":
 				cards = append(cards, 12)
 			case "K":
@@ -144,7 +153,6 @@ func (h handList) Swap(i, j int) {
 
 func main() {
 	hands := parseInput()
-
 	sort.Sort(hands)
 	sum := 0
 	for ind, handI := range hands {
